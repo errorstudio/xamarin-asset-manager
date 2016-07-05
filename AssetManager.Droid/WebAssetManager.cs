@@ -163,7 +163,7 @@ namespace AssetManager.Droid
 			}
 			catch (WebException ex)
 			{
-				if (ex.Status == WebExceptionStatus.ConnectFailure || ex.Status == WebExceptionStatus.Timeout)
+				if (ex.Status == WebExceptionStatus.NameResolutionFailure || ex.Status == WebExceptionStatus.ConnectFailure || ex.Status == WebExceptionStatus.Timeout)
 				{
 					return false;
 				}
