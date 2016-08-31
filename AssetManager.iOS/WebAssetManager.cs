@@ -28,6 +28,15 @@ namespace AssetManager.iOS
 			webClient.DownloadFileCompleted += assetsDownloaded;
 		}
 
+		public void openUrlInBrowser(string url)
+		{
+			NSUrl nsurl = new NSUrl(url);
+			UIApplication.SharedApplication.OpenUrl(nsurl);
+		}
+
+		/*
+		 * Checks whether we have assets to render
+		 */
 		public Boolean assetsCopied()
 		{
 			var writablePath = this.getWritableAssetPath();
@@ -40,6 +49,9 @@ namespace AssetManager.iOS
 			return false;
 		}
 
+		/*
+		 * Copies either bundled or downloaded assets to the sandbox
+		 */
 		public void ensureAssetsArePresent()
 		{
 			string archiveName = "Latest.zip";
@@ -92,6 +104,9 @@ namespace AssetManager.iOS
 			}
 		}
 
+		/*
+		 * The path to where we store the html we will be rendering
+		 */
 		public String getWritableAssetPath()
 		{
 			string docPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal).Replace("Documents", "tmp");
@@ -100,6 +115,9 @@ namespace AssetManager.iOS
 			return tmpPath;
 		}
 
+		/*
+		 * The path to where we store the assets archive
+		 */
 		public String getLocalAssetPath()
 		{
 			string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -108,6 +126,9 @@ namespace AssetManager.iOS
 			return webPath;
 		}
 
+		/*
+		 * The path to where the included (default) content is stored
+		 */
 		public String getBundledAssetPath()
 		{
 			var bundledPath = NSBundle.MainBundle.PathForResource("web", "zip");
@@ -115,6 +136,9 @@ namespace AssetManager.iOS
 			return bundledPath;
 		}
 
+		/*
+		 * Given a tab and a slug, this will return the path on disk to the file we need to render
+		 */
 		public string getFilePath(string tab, string slug)
 		{
 			var root = this.getWritableAssetPath();
@@ -200,12 +224,26 @@ namespace AssetManager.iOS
 		 */
 		public void assetsDownloaded(object sender, AsyncCompletedEventArgs args)
 		{
+			string archiveName = "Latest-web.zip";
+			string storagePath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+			string contentPath = Path.Combine(storagePath, "..", "Library", "Content");
+
+			// if the args (web connection) has an error status, dont attempt to open or store the file
+			if (args.Error != null)
+			{
+				return;
+			}
+
+			tempFilename = Path.Combine(contentPath, "Latest.zip");
+
+			File.Delete(tempFilename);
+			File.Move(Path.Combine(contentPath, archiveName), tempFilename);
 			this.copyAssets(tempFilename);
 
 			ApplicationTabs tabs = (App.Current.MainPage as ApplicationTabs);
 
-		   	foreach (var page in tabs.Children)
-			{
+		  foreach (var page in tabs.Children)
+			  {
 				TabRenderer tab;
 
 				if (page.GetType() == typeof(NavigationPage))

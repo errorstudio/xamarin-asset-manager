@@ -4,6 +4,8 @@ namespace AssetManager
 {
 	public interface IWebAssetManager
 	{
+		void openUrlInBrowser(string url);
+
 		Boolean assetsCopied();
 		void copyAssets(string fromAssetsPath);
 		String getWritableAssetPath();

@@ -28,6 +28,14 @@ namespace AssetManager.Droid
 			webClient.DownloadFileCompleted += assetsDownloaded;
 		}
 
+		public void openUrlInBrowser(string url)
+		{
+			Device.OpenUri(new Uri(url));
+		}
+
+		/*
+		 * Checks whether we have assets to render
+		 */
 		public Boolean assetsCopied()
 		{
 			var writablePath = this.getWritableAssetPath();
@@ -40,6 +48,9 @@ namespace AssetManager.Droid
 			return false;
 		}
 
+		/*
+		 * Copies bundled assets to the sandbox
+		 */
 		public void ensureAssetsArePresent()
 		{
 			string archiveName = "Latest.zip";
@@ -209,6 +220,20 @@ namespace AssetManager.Droid
 		 */
 		public void assetsDownloaded(object sender, AsyncCompletedEventArgs args)
 		{
+			string archiveName = "Latest-web.zip";
+			string storagePath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+			string contentPath = Path.Combine(storagePath, "..", "Library", "Content");
+
+			// if the args (web connection) has an error status, dont attempt to open or store the file
+			if (args.Error != null)
+			{
+				return;
+			}
+
+			tempFilename = Path.Combine(contentPath, "Latest.zip");
+
+			File.Delete(tempFilename);
+			File.Move(Path.Combine(contentPath, archiveName), tempFilename);
 			this.copyAssets(tempFilename);
 
 			foreach (var page in (App.Current.MainPage as TabbedPage).Children)
